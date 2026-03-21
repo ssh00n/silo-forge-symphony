@@ -1,0 +1,24 @@
+[Unit]
+Description=Symphony Orchestrator (Linear → Claude with Codex fallback)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStartPre=/usr/local/bin/vault-env.sh symphony /home/ubuntu/symphony/.env
+ExecStart=/home/ubuntu/symphony/node_modules/.bin/tsx /home/ubuntu/symphony/src/index.ts --runner auto /home/ubuntu/symphony/WORKFLOW.md
+WorkingDirectory=/home/ubuntu/symphony
+Restart=on-failure
+RestartSec=10
+Environment=NODE_ENV=production
+EnvironmentFile=/home/ubuntu/symphony/.env
+
+# Logging
+StandardOutput=append:/home/ubuntu/symphony/logs/symphony.log
+StandardError=append:/home/ubuntu/symphony/logs/symphony.log
+
+# Safety
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

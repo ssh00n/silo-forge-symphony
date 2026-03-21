@@ -1,0 +1,10 @@
+Silo Forge Symphony
+
+This repository contains derivative work based on openai/symphony.
+
+Upstream project:
+- Repository: https://github.com/openai/symphony
+- Copyright: OpenAI and contributors
+- License: Apache License 2.0
+
+Additional modifications in this repository adapt Symphony as the execution runtime integration layer for Silo Forge.

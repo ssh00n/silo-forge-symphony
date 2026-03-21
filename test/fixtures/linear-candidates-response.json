@@ -1,0 +1,51 @@
+{
+  "data": {
+    "issues": {
+      "pageInfo": {
+        "hasNextPage": false,
+        "endCursor": null
+      },
+      "nodes": [
+        {
+          "id": "issue-1",
+          "identifier": "PRJ-1",
+          "title": "Fix login bug",
+          "description": "Users can't login with SSO",
+          "priority": 1,
+          "branchName": "fix/login-bug",
+          "url": "https://linear.app/team/issue/PRJ-1",
+          "createdAt": "2026-03-01T10:00:00Z",
+          "updatedAt": "2026-03-02T10:00:00Z",
+          "state": { "name": "Todo" },
+          "labels": { "nodes": [{ "name": "Bug" }, { "name": "Auth" }] },
+          "inverseRelations": { "nodes": [] }
+        },
+        {
+          "id": "issue-2",
+          "identifier": "PRJ-2",
+          "title": "Add dark mode",
+          "description": null,
+          "priority": 3,
+          "branchName": null,
+          "url": "https://linear.app/team/issue/PRJ-2",
+          "createdAt": "2026-03-02T10:00:00Z",
+          "updatedAt": "2026-03-03T10:00:00Z",
+          "state": { "name": "In Progress" },
+          "labels": { "nodes": [{ "name": "Feature" }] },
+          "inverseRelations": {
+            "nodes": [
+              {
+                "type": "blocks",
+                "issue": {
+                  "id": "issue-3",
+                  "identifier": "PRJ-3",
+                  "state": { "name": "Todo" }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
