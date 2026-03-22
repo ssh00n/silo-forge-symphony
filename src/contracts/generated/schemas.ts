@@ -985,6 +985,162 @@ export const queueWebhookDeliveryPayloadSchemaJson = {
   }
 } as const;
 
+export const telemetryQueueWorkerEventPayloadSchemaJson = {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.silo-forge.dev/telemetry/queue-worker-event.payload.schema.json",
+  "title": "SiloForgeQueueWorkerEventTelemetryPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "queue_name",
+    "status"
+  ],
+  "properties": {
+    "queue_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "batch_started",
+        "dequeue_failed",
+        "task_unhandled",
+        "succeeded",
+        "failed",
+        "dropped",
+        "batch_complete",
+        "loop_failed",
+        "stopped"
+      ]
+    },
+    "task_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "attempt": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "error": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "throttle_seconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "retry_delay_seconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    }
+  }
+} as const;
+
+export const telemetryWebhookDeliveryResultPayloadSchemaJson = {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.silo-forge.dev/telemetry/webhook-delivery-result.payload.schema.json",
+  "title": "SiloForgeWebhookDeliveryResultTelemetryPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "attempt",
+    "status"
+  ],
+  "properties": {
+    "board_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "webhook_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "payload_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "succeeded",
+        "failed",
+        "requeued",
+        "batch_complete",
+        "batch_started",
+        "batch_finished"
+      ]
+    },
+    "error": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "retry_delay_seconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "duration_ms": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "throttle_seconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    }
+  }
+} as const;
+
 export type ActivityExecutionRunPayloadStatus = SchemaEnum<SchemaProperties<typeof activityExecutionRunPayloadSchemaJson>["status"]>;
 export type ActivityExecutionRunPayloadExecutorKind = SchemaEnum<SchemaProperties<typeof activityExecutionRunPayloadSchemaJson>["executor_kind"]>;
 export type ExecutionCallbackPayloadStatus = SchemaEnum<SchemaProperties<typeof executionCallbackPayloadSchemaJson>["status"]>;
@@ -1004,6 +1160,8 @@ export type AgentLifecycleReconcileQueuePayload = { agent_id: string; gateway_id
 export type QueuedTaskEnvelope = { task_type: string; payload: Record<string, unknown>; created_at: string; attempts?: number; };
 export type TaskExecutionDispatchQueuePayload = { organization_id: string; board_id: string; task_id: string; run_id: string; };
 export type WebhookDeliveryQueuePayload = { board_id: string; webhook_id: string; payload_id: string; received_at: string; };
+export type QueueWorkerEventTelemetryPayload = { queue_name: string; status: "batch_started" | "dequeue_failed" | "task_unhandled" | "succeeded" | "failed" | "dropped" | "batch_complete" | "loop_failed" | "stopped"; task_type?: string | null; attempt?: number | null; error?: string | null; count?: number | null; throttle_seconds?: number | null; retry_delay_seconds?: number | null; };
+export type WebhookDeliveryResultTelemetryPayload = { board_id?: string | null; webhook_id?: string | null; payload_id?: string | null; attempt: number; status: "succeeded" | "failed" | "requeued" | "batch_complete" | "batch_started" | "batch_finished"; error?: string | null; retry_delay_seconds?: number | null; count?: number | null; duration_ms?: number | null; throttle_seconds?: number | null; };
 
 export const contractSchemaIds = {
   "activity__approval_payload_schema_json": "activityApprovalPayloadSchemaJson",
@@ -1018,4 +1176,6 @@ export const contractSchemaIds = {
   "queue__task_envelope_schema_json": "queueTaskEnvelopeSchemaJson",
   "queue__task_execution_dispatch_payload_schema_json": "queueTaskExecutionDispatchPayloadSchemaJson",
   "queue__webhook_delivery_payload_schema_json": "queueWebhookDeliveryPayloadSchemaJson",
+  "telemetry__queue_worker_event_payload_schema_json": "telemetryQueueWorkerEventPayloadSchemaJson",
+  "telemetry__webhook_delivery_result_payload_schema_json": "telemetryWebhookDeliveryResultPayloadSchemaJson",
 } as const;
