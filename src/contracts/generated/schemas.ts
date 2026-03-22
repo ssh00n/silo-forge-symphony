@@ -891,6 +891,36 @@ export const queueAgentLifecycleReconcilePayloadSchemaJson = {
   }
 } as const;
 
+export const queueTaskEnvelopeSchemaJson = {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.silo-forge.dev/queue/task-envelope.schema.json",
+  "title": "SiloForgeQueuedTaskEnvelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task_type",
+    "payload",
+    "created_at"
+  ],
+  "properties": {
+    "task_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payload": {
+      "type": "object"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "attempts": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+} as const;
+
 export const queueTaskExecutionDispatchPayloadSchemaJson = {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.silo-forge.dev/queue/task-execution-dispatch.payload.schema.json",
@@ -971,6 +1001,7 @@ export type ExecutionRunActivityPayload = { executor_kind: "symphony"; run_id: s
 export type GatewayActivityPayload = { notification_kind: string; notification_status: string; board_id?: string | null; board_name?: string | null; actor_agent_id?: string | null; target_agent_id?: string | null; target_agent_name?: string | null; gateway_id?: string | null; gateway_name?: string | null; action?: string | null; delivery_status?: string | null; target_kind?: string | null; workspace_path?: string | null; session_key?: string | null; error?: string | null; };
 export type TaskActivityPayload = { task_id: string; board_id: string; task_title: string; status: string; assigned_agent_id?: string | null; priority?: string | number | null; previous_status?: string | null; reason?: string | null; dependency_task_id?: string | null; dependency_task_title?: string | null; dependency_task_status?: string | null; target_agent_id?: string | null; target_agent_name?: string | null; notification_kind?: string | null; notification_status?: string | null; error?: string | null; };
 export type AgentLifecycleReconcileQueuePayload = { agent_id: string; gateway_id: string; board_id?: string | null; generation: number; checkin_deadline_at: string; };
+export type QueuedTaskEnvelope = { task_type: string; payload: Record<string, unknown>; created_at: string; attempts?: number; };
 export type TaskExecutionDispatchQueuePayload = { organization_id: string; board_id: string; task_id: string; run_id: string; };
 export type WebhookDeliveryQueuePayload = { board_id: string; webhook_id: string; payload_id: string; received_at: string; };
 
@@ -984,6 +1015,7 @@ export const contractSchemaIds = {
   "execution__dispatch_acceptance_schema_json": "executionDispatchAcceptanceSchemaJson",
   "execution__dispatch_request_schema_json": "executionDispatchRequestSchemaJson",
   "queue__agent_lifecycle_reconcile_payload_schema_json": "queueAgentLifecycleReconcilePayloadSchemaJson",
+  "queue__task_envelope_schema_json": "queueTaskEnvelopeSchemaJson",
   "queue__task_execution_dispatch_payload_schema_json": "queueTaskExecutionDispatchPayloadSchemaJson",
   "queue__webhook_delivery_payload_schema_json": "queueWebhookDeliveryPayloadSchemaJson",
 } as const;
