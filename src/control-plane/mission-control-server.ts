@@ -1,5 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { log } from "../logging/logger.js";
+import { executionDispatchRequestSchemaJson } from "../contracts/generated/schemas.js";
+import { validateContractPayload, ContractValidationError } from "../contracts/json-schema.js";
 import type {
   MissionControlDispatchAcceptance,
   MissionControlDispatchRequest,
@@ -29,20 +31,6 @@ async function readJson(req: IncomingMessage): Promise<unknown> {
   }
   const raw = Buffer.concat(chunks).toString("utf8");
   return raw ? JSON.parse(raw) : {};
-}
-
-function isDispatchRequest(value: unknown): value is MissionControlDispatchRequest {
-  if (!value || typeof value !== "object") return false;
-  const v = value as Record<string, unknown>;
-  return (
-    typeof v.execution_run_id === "string" &&
-    typeof v.silo_slug === "string" &&
-    typeof v.role_slug === "string" &&
-    typeof v.workspace_root === "string" &&
-    typeof v.callback_url === "string" &&
-    typeof v.issue === "object" &&
-    v.issue !== null
-  );
 }
 
 function authorized(req: IncomingMessage): boolean {
@@ -77,15 +65,19 @@ export async function startMissionControlServer(opts: {
       }
       try {
         const body = await readJson(req);
-        if (!isDispatchRequest(body)) {
-          json(res, 400, { error: "invalid_dispatch_request" });
-          return;
-        }
+        validateContractPayload(
+          executionDispatchRequestSchemaJson as Record<string, unknown>,
+          body,
+        );
         const acceptance: MissionControlDispatchAcceptance =
-          await opts.orchestrator.dispatchMissionControl(body);
+          await opts.orchestrator.dispatchMissionControl(body as MissionControlDispatchRequest);
         json(res, 200, acceptance);
         return;
       } catch (err) {
+        if (err instanceof ContractValidationError) {
+          json(res, 400, { error: "invalid_dispatch_request", message: err.message });
+          return;
+        }
         log.error(
           `Mission Control dispatch failed: ${err instanceof Error ? err.message : String(err)}`,
         );

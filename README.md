@@ -44,6 +44,7 @@ The local delta should stay as small as possible and focus on:
 - follow upstream Symphony concepts and boundaries
 - keep the bridge contract compatible with Silo Forge
 - prefer generated contract artifacts over hand-maintained duplicated interfaces
+- refresh generated schemas from the control-plane repo with `cd ../openclaw-mission-control && make contracts-gen`
 - keep release and runtime concerns separate from the control plane repo
 
 ## Attribution

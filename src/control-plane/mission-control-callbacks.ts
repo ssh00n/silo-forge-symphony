@@ -1,4 +1,6 @@
 import { log } from "../logging/logger.js";
+import { executionCallbackPayloadSchemaJson } from "../contracts/generated/schemas.js";
+import { validateContractPayload, ContractValidationError } from "../contracts/json-schema.js";
 import type { RunningEntry } from "../types.js";
 import type {
   MissionControlCallbackPayload,
@@ -17,6 +19,27 @@ export async function sendMissionControlCallback(
   entry: RunningEntry,
   payload: MissionControlCallbackPayload,
 ): Promise<void> {
+  try {
+    validateContractPayload(
+      executionCallbackPayloadSchemaJson as Record<string, unknown>,
+      payload,
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    log.warn(
+      `Mission Control callback payload failed contract validation: ${message}`,
+      {
+        issue_id: entry.issue.id,
+        issue_identifier: entry.identifier,
+        callback_url: binding.callback_url,
+      },
+    );
+    if (err instanceof ContractValidationError) {
+      return;
+    }
+    throw err;
+  }
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
