@@ -1,14 +1,11 @@
-import { executionCallbackPayloadSchemaJson, executionDispatchAcceptanceSchemaJson } from "../contracts/generated/schemas.js";
+import type {
+  ExecutionCallbackPayloadStatus,
+  ExecutionDispatchAcceptanceAdapterMode,
+} from "../contracts/generated/schemas.js";
 import type { BlockerRef } from "../types.js";
 
-type EnumValues<T> = T extends { enum: readonly (infer U)[] } ? U : never;
-type CallbackProperties = typeof executionCallbackPayloadSchemaJson.properties;
-type DispatchAcceptanceProperties = typeof executionDispatchAcceptanceSchemaJson.properties;
-
-export type MissionControlCallbackStatus = EnumValues<CallbackProperties["status"]>;
-export type MissionControlDispatchAdapterMode = EnumValues<
-  DispatchAcceptanceProperties["adapter_mode"]
->;
+export type MissionControlCallbackStatus = ExecutionCallbackPayloadStatus;
+export type MissionControlDispatchAdapterMode = ExecutionDispatchAcceptanceAdapterMode;
 
 export interface MissionControlDispatchIssue {
   id: string;
