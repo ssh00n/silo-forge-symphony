@@ -4,6 +4,67 @@
 export type SchemaEnum<T> = T extends { enum: readonly (infer U)[] } ? U : never;
 export type SchemaProperties<T> = T extends { properties: infer P } ? P : never;
 
+export const activityApprovalPayloadSchemaJson = {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.silo-forge.dev/activity/approval.payload.schema.json",
+  "title": "SiloForgeApprovalActivityPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "approval_id",
+    "board_id",
+    "action_type",
+    "approval_status",
+    "notification_status"
+  ],
+  "properties": {
+    "approval_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "board_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "agent_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "action_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notification_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lead_agent_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "error": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+} as const;
+
 export const activityExecutionRunPayloadSchemaJson = {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.silo-forge.dev/activity/execution-run.payload.schema.json",
@@ -129,6 +190,111 @@ export const activityExecutionRunPayloadSchemaJson = {
     },
     "retried_from_run_id": {
       "type": "string"
+    }
+  }
+} as const;
+
+export const activityTaskPayloadSchemaJson = {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.silo-forge.dev/activity/task.payload.schema.json",
+  "title": "SiloForgeTaskActivityPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task_id",
+    "board_id",
+    "task_title",
+    "status"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "board_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assigned_agent_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "priority": {
+      "type": [
+        "string",
+        "integer",
+        "null"
+      ]
+    },
+    "previous_status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dependency_task_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dependency_task_title": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dependency_task_status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_agent_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_agent_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notification_kind": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notification_status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "error": {
+      "type": [
+        "string",
+        "null"
+      ]
     }
   }
 } as const;
@@ -517,7 +683,9 @@ export type ExecutionDispatchAcceptance = { accepted: boolean; adapter_mode: "ht
 export type ExecutionDispatchRequest = { execution_run_id: string; silo_slug: string; role_slug: string; workspace_root: string; callback_url: string; prompt_override?: string | null; adapter_mode: "http" | "stub"; issue: { id: string; identifier: string; title: string; description: string | null; priority: number | null; state: string; branch_name: string | null; url: string | null; labels: Array<string>; blocked_by: Array<{ id: string | null; identifier: string | null; state: string | null; }>; created_at: string | null; updated_at: string | null; }; };
 
 export const contractSchemaIds = {
+  "activity__approval_payload_schema_json": "activityApprovalPayloadSchemaJson",
   "activity__execution_run_payload_schema_json": "activityExecutionRunPayloadSchemaJson",
+  "activity__task_payload_schema_json": "activityTaskPayloadSchemaJson",
   "execution__callback_payload_schema_json": "executionCallbackPayloadSchemaJson",
   "execution__dispatch_acceptance_schema_json": "executionDispatchAcceptanceSchemaJson",
   "execution__dispatch_request_schema_json": "executionDispatchRequestSchemaJson",
