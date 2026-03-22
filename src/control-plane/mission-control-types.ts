@@ -1,4 +1,14 @@
+import { executionCallbackPayloadSchemaJson, executionDispatchAcceptanceSchemaJson } from "../contracts/generated/schemas.js";
 import type { BlockerRef } from "../types.js";
+
+type EnumValues<T> = T extends { enum: readonly (infer U)[] } ? U : never;
+type CallbackProperties = typeof executionCallbackPayloadSchemaJson.properties;
+type DispatchAcceptanceProperties = typeof executionDispatchAcceptanceSchemaJson.properties;
+
+export type MissionControlCallbackStatus = EnumValues<CallbackProperties["status"]>;
+export type MissionControlDispatchAdapterMode = EnumValues<
+  DispatchAcceptanceProperties["adapter_mode"]
+>;
 
 export interface MissionControlDispatchIssue {
   id: string;
@@ -28,7 +38,7 @@ export interface MissionControlDispatchRequest {
 
 export interface MissionControlDispatchAcceptance {
   accepted: boolean;
-  adapter_mode: "http";
+  adapter_mode: MissionControlDispatchAdapterMode;
   external_run_id: string;
   workspace_path: string;
   branch_name: string;
@@ -36,7 +46,7 @@ export interface MissionControlDispatchAcceptance {
 }
 
 export interface MissionControlCallbackPayload {
-  status: "running" | "succeeded" | "failed" | "cancelled";
+  status: MissionControlCallbackStatus;
   external_run_id?: string;
   workspace_path?: string;
   branch_name?: string;
