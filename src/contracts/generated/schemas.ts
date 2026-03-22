@@ -324,6 +324,18 @@ export const activityExecutionRunPayloadSchemaJson = {
     "completion_kind": {
       "type": "string"
     },
+    "failure_reason": {
+      "type": "string"
+    },
+    "block_reason": {
+      "type": "string"
+    },
+    "cancel_reason": {
+      "type": "string"
+    },
+    "stall_reason": {
+      "type": "string"
+    },
     "last_event": {
       "type": "string"
     },
@@ -722,6 +734,30 @@ export const executionCallbackPayloadSchemaJson = {
           ]
         },
         "completion_kind": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "failure_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "block_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cancel_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stall_reason": {
           "type": [
             "string",
             "null"
@@ -1297,15 +1333,15 @@ export type ActivityExecutionRunPayloadExecutorKind = SchemaEnum<SchemaPropertie
 export type ExecutionCallbackPayloadStatus = SchemaEnum<SchemaProperties<typeof executionCallbackPayloadSchemaJson>["status"]>;
 export type ExecutionDispatchAcceptanceAdapterMode = SchemaEnum<SchemaProperties<typeof executionDispatchAcceptanceSchemaJson>["adapter_mode"]>;
 
-export type ActivityExecutionRunPayload = { executor_kind: "symphony"; run_id: string; run_short_id: string; organization_id?: string; board_id?: string; task_id?: string; silo_id: string; silo_slug?: string; role_slug: string; status: "queued" | "dispatching" | "running" | "succeeded" | "failed" | "cancelled" | "blocked"; adapter_mode?: string; branch_hint?: string; branch_name?: string; workspace_path?: string; external_run_id?: string; summary?: string; pr_url?: string; pull_request?: number; total_tokens?: number; error_message?: string; issue_identifier?: string; runner_kind?: string; completion_kind?: string; last_event?: string; last_message?: string; session_id?: string; turn_count?: number; duration_ms?: number; has_prompt_override?: boolean; retried_from_run_id?: string; };
-export type ExecutionCallbackPayload = { status: "queued" | "dispatching" | "running" | "succeeded" | "failed" | "cancelled" | "blocked"; external_run_id?: string | null; workspace_path?: string | null; branch_name?: string | null; pr_url?: string | null; summary?: string | null; error_message?: string | null; issue_identifier?: string | null; completion_kind?: string | null; duration_ms?: number | null; result_payload?: { issue_identifier?: string | null; completion_kind?: string | null; last_event?: string | null; last_message?: string | null; session_id?: string | null; turn_count?: number | null; duration_ms?: number | null; usage?: { input_tokens?: number | null; output_tokens?: number | null; total_tokens?: number | null; } | null; } | null; };
+export type ActivityExecutionRunPayload = { executor_kind: "symphony"; run_id: string; run_short_id: string; organization_id?: string; board_id?: string; task_id?: string; silo_id: string; silo_slug?: string; role_slug: string; status: "queued" | "dispatching" | "running" | "succeeded" | "failed" | "cancelled" | "blocked"; adapter_mode?: string; branch_hint?: string; branch_name?: string; workspace_path?: string; external_run_id?: string; summary?: string; pr_url?: string; pull_request?: number; total_tokens?: number; error_message?: string; issue_identifier?: string; runner_kind?: string; completion_kind?: string; failure_reason?: string; block_reason?: string; cancel_reason?: string; stall_reason?: string; last_event?: string; last_message?: string; session_id?: string; turn_count?: number; duration_ms?: number; has_prompt_override?: boolean; retried_from_run_id?: string; };
+export type ExecutionCallbackPayload = { status: "queued" | "dispatching" | "running" | "succeeded" | "failed" | "cancelled" | "blocked"; external_run_id?: string | null; workspace_path?: string | null; branch_name?: string | null; pr_url?: string | null; summary?: string | null; error_message?: string | null; issue_identifier?: string | null; completion_kind?: string | null; duration_ms?: number | null; result_payload?: { issue_identifier?: string | null; completion_kind?: string | null; failure_reason?: string | null; block_reason?: string | null; cancel_reason?: string | null; stall_reason?: string | null; last_event?: string | null; last_message?: string | null; session_id?: string | null; turn_count?: number | null; duration_ms?: number | null; usage?: { input_tokens?: number | null; output_tokens?: number | null; total_tokens?: number | null; } | null; } | null; };
 export type ExecutionDispatchAcceptance = { accepted: boolean; adapter_mode: "http" | "stub"; external_run_id: string; workspace_path: string; branch_name: string; summary: string; };
 export type ExecutionDispatchRequest = { execution_run_id: string; silo_slug: string; role_slug: string; workspace_root: string; callback_url: string; prompt_override?: string | null; adapter_mode: "http" | "stub"; issue: { id: string; identifier: string; title: string; description: string | null; priority: number | null; state: string; branch_name: string | null; url: string | null; labels: Array<string>; blocked_by: Array<{ id: string | null; identifier: string | null; state: string | null; }>; created_at: string | null; updated_at: string | null; }; };
 
 export type AgentActivityPayload = { agent_id: string; agent_name: string; action: string; board_id?: string | null; delivery_status?: string | null; gateway_id?: string | null; gateway_name?: string | null; workspace_path?: string | null; session_key?: string | null; target_kind?: string | null; error?: string | null; };
 export type ApprovalActivityPayload = { approval_id: string; board_id: string; task_id?: string | null; agent_id?: string | null; action_type: string; approval_status: string; notification_status: string; lead_agent_id?: string | null; error?: string | null; };
 export type BoardActivityPayload = { notification_kind: string; notification_status: string; board_id: string; board_name: string; target_agent_id: string; target_agent_name: string; source_board_id?: string | null; source_board_name?: string | null; board_group_id?: string | null; board_group_name?: string | null; changed_fields?: Array<string> | null; error?: string | null; };
-export type ExecutionRunActivityPayload = { executor_kind: "symphony"; run_id: string; run_short_id: string; organization_id?: string; board_id?: string; task_id?: string; silo_id: string; silo_slug?: string; role_slug: string; status: "queued" | "dispatching" | "running" | "succeeded" | "failed" | "cancelled" | "blocked"; adapter_mode?: string; branch_hint?: string; branch_name?: string; workspace_path?: string; external_run_id?: string; summary?: string; pr_url?: string; pull_request?: number; total_tokens?: number; error_message?: string; issue_identifier?: string; runner_kind?: string; completion_kind?: string; last_event?: string; last_message?: string; session_id?: string; turn_count?: number; duration_ms?: number; has_prompt_override?: boolean; retried_from_run_id?: string; };
+export type ExecutionRunActivityPayload = { executor_kind: "symphony"; run_id: string; run_short_id: string; organization_id?: string; board_id?: string; task_id?: string; silo_id: string; silo_slug?: string; role_slug: string; status: "queued" | "dispatching" | "running" | "succeeded" | "failed" | "cancelled" | "blocked"; adapter_mode?: string; branch_hint?: string; branch_name?: string; workspace_path?: string; external_run_id?: string; summary?: string; pr_url?: string; pull_request?: number; total_tokens?: number; error_message?: string; issue_identifier?: string; runner_kind?: string; completion_kind?: string; failure_reason?: string; block_reason?: string; cancel_reason?: string; stall_reason?: string; last_event?: string; last_message?: string; session_id?: string; turn_count?: number; duration_ms?: number; has_prompt_override?: boolean; retried_from_run_id?: string; };
 export type GatewayActivityPayload = { notification_kind: string; notification_status: string; board_id?: string | null; board_name?: string | null; actor_agent_id?: string | null; target_agent_id?: string | null; target_agent_name?: string | null; gateway_id?: string | null; gateway_name?: string | null; action?: string | null; delivery_status?: string | null; target_kind?: string | null; workspace_path?: string | null; session_key?: string | null; error?: string | null; };
 export type SiloRuntimeActivityPayload = { silo_id: string; silo_slug: string; silo_name: string; board_id?: string | null; mode: "validate" | "apply"; operation_id: string; result_count: string; warning_count: string; restart_required: "yes" | "no"; gateway_names: string; gateway_ids: string; roles: string; };
 export type TaskActivityPayload = { task_id: string; board_id: string; task_title: string; status: string; assigned_agent_id?: string | null; priority?: string | number | null; previous_status?: string | null; reason?: string | null; dependency_task_id?: string | null; dependency_task_title?: string | null; dependency_task_status?: string | null; target_agent_id?: string | null; target_agent_name?: string | null; notification_kind?: string | null; notification_status?: string | null; error?: string | null; };
