@@ -10,10 +10,33 @@ import { WorkspaceManager } from "../workspace/workspace-manager.js";
 import { buildTurnPrompt } from "./prompt-builder.js";
 import { log } from "../logging/logger.js";
 
-export interface WorkerResult {
-  status: "normal" | "error";
-  error?: string;
-}
+export type WorkerResult =
+  | { status: "normal" }
+  | {
+      status: "error";
+      error: string;
+      completion_kind?: string;
+      failure_reason?: string;
+    }
+  | {
+      status: "cancelled";
+      reason: string;
+      completion_kind?: string;
+      cancel_reason?: string;
+    }
+  | {
+      status: "timeout";
+      reason: string;
+      completion_kind?: string;
+      failure_reason?: string;
+      stall_reason?: string;
+    }
+  | {
+      status: "blocked";
+      reason: string;
+      completion_kind?: string;
+      block_reason?: string;
+    };
 
 export interface WorkerCallbacks {
   onEvent: (issueId: string, event: AgentEvent) => void;
@@ -54,7 +77,12 @@ export async function runWorker(opts: {
       `Workspace creation failed: ${err instanceof Error ? err.message : String(err)}`,
       ctx,
     );
-    return { status: "error", error: "workspace error" };
+    return {
+      status: "error",
+      error: "workspace error",
+      completion_kind: "workspace_error",
+      failure_reason: "Workspace creation failed before the run could start.",
+    };
   }
 
   // 2. Run before_run hook
@@ -65,7 +93,12 @@ export async function runWorker(opts: {
       `before_run hook failed: ${err instanceof Error ? err.message : String(err)}`,
       ctx,
     );
-    return { status: "error", error: "before_run hook error" };
+    return {
+      status: "error",
+      error: "before_run hook error",
+      completion_kind: "before_run_error",
+      failure_reason: "The before_run hook failed before execution started.",
+    };
   }
 
   // 3. Start agent session
@@ -79,7 +112,12 @@ export async function runWorker(opts: {
       ctx,
     );
     await workspaceManager.runAfterRun(workspace.path);
-    return { status: "error", error: "agent session startup error" };
+    return {
+      status: "error",
+      error: "agent session startup error",
+      completion_kind: "session_start_error",
+      failure_reason: "The runtime session could not start.",
+    };
   }
 
   // 4. Multi-turn loop
@@ -107,7 +145,12 @@ export async function runWorker(opts: {
         );
         await session.stop();
         await workspaceManager.runAfterRun(workspace.path);
-        return { status: "error", error: "prompt error" };
+        return {
+          status: "error",
+          error: "prompt error",
+          completion_kind: "prompt_error",
+          failure_reason: "The runtime prompt could not be built.",
+        };
       }
 
       log.info(
@@ -130,7 +173,37 @@ export async function runWorker(opts: {
         log.warn(`Turn ended: status=${turnResult.status}`, ctx);
         await session.stop();
         await workspaceManager.runAfterRun(workspace.path);
-        return { status: "error", error: `agent turn error: ${error}` };
+        if (turnResult.status === "cancelled") {
+          return {
+            status: "cancelled",
+            reason: turnResult.reason,
+            completion_kind: "cancelled",
+            cancel_reason: turnResult.reason,
+          };
+        }
+        if (turnResult.status === "timeout") {
+          return {
+            status: "timeout",
+            reason: "Runner timed out before completing the turn.",
+            completion_kind: "timeout",
+            failure_reason: "Runner timed out before completing the turn.",
+            stall_reason: "No terminal callback arrived before the runtime timeout.",
+          };
+        }
+        if (turnResult.status === "input_required") {
+          return {
+            status: "blocked",
+            reason: "Runner requires operator input before continuing.",
+            completion_kind: "input_required",
+            block_reason: "Runner requires operator input before continuing.",
+          };
+        }
+        return {
+          status: "error",
+          error: `agent turn error: ${error}`,
+          completion_kind: "error",
+          failure_reason: `Agent turn failed: ${error}`,
+        };
       }
 
       log.info(`Turn ${turnNumber} completed`, ctx);
@@ -149,7 +222,12 @@ export async function runWorker(opts: {
           );
           await session.stop();
           await workspaceManager.runAfterRun(workspace.path);
-          return { status: "error", error: "issue state refresh error" };
+          return {
+            status: "error",
+            error: "issue state refresh error",
+            completion_kind: "state_refresh_error",
+            failure_reason: "The issue state could not be refreshed between turns.",
+          };
         }
 
         const normalizedState = currentIssue.state.trim().toLowerCase();
@@ -176,6 +254,8 @@ export async function runWorker(opts: {
     return {
       status: "error",
       error: err instanceof Error ? err.message : String(err),
+      completion_kind: "worker_error",
+      failure_reason: err instanceof Error ? err.message : String(err),
     };
   }
 

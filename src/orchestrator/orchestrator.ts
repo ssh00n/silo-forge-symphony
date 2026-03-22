@@ -470,6 +470,8 @@ export class Orchestrator {
       this.handleWorkerExit(issue.id, {
         status: "error",
         error: err instanceof Error ? err.message : String(err),
+        completion_kind: "worker_error",
+        failure_reason: err instanceof Error ? err.message : String(err),
       });
     });
   }
@@ -634,22 +636,53 @@ export class Orchestrator {
         onFire: (id) => this.handleRetryFired(id),
       });
     } else {
-      log.warn(`Worker failed: ${result.error}`, ctx);
+      const workerError = result.status === "error" ? result.error : undefined;
+      const workerReason =
+        result.status === "cancelled" || result.status === "timeout" || result.status === "blocked"
+          ? result.reason
+          : undefined;
+      log.warn(`Worker failed: ${workerError ?? workerReason ?? result.status}`, ctx);
       void this.sharedMemory.syncAfterRun();
 
       if (missionControlBinding) {
+        const callbackStatus =
+          result.status === "cancelled"
+            ? "cancelled"
+            : result.status === "blocked"
+              ? "blocked"
+              : "failed";
+        const callbackSummary =
+          result.status === "cancelled"
+            ? "Symphony worker was cancelled."
+            : result.status === "blocked"
+              ? "Symphony worker is blocked and needs operator action."
+              : result.status === "timeout"
+                ? "Symphony worker timed out."
+                : "Symphony worker failed.";
+        const completionKind =
+          result.completion_kind ?? (result.status === "blocked" ? "input_required" : result.status);
         void sendMissionControlCallback(missionControlBinding, entry, {
-          status: "failed",
+          status: callbackStatus,
           external_run_id: missionControlBinding.external_run_id,
           workspace_path: missionControlBinding.workspace_path,
           branch_name: missionControlBinding.branch_name,
-          summary: "Symphony worker failed.",
-          error_message: result.error,
+          summary: callbackSummary,
+          error_message:
+            result.status === "error" || result.status === "timeout"
+              ? workerError ?? workerReason
+              : undefined,
           issue_identifier: entry.identifier,
-          completion_kind: "error",
+          completion_kind: completionKind,
           duration_ms: this.runtimeDurationMs(entry),
           result_payload: this.missionControlResultPayload(entry, {
-            completion_kind: "error",
+            completion_kind: completionKind,
+            failure_reason:
+              result.status === "error" || result.status === "timeout"
+                ? result.failure_reason ?? workerError ?? workerReason
+                : undefined,
+            block_reason: result.status === "blocked" ? result.block_reason ?? workerReason : undefined,
+            cancel_reason: result.status === "cancelled" ? result.cancel_reason ?? workerReason : undefined,
+            stall_reason: result.status === "timeout" ? result.stall_reason ?? workerReason : undefined,
             usage: {
               input_tokens: entry.codex_input_tokens,
               output_tokens: entry.codex_output_tokens,
@@ -663,7 +696,7 @@ export class Orchestrator {
       const nextAttempt = (entry.retry_attempt ?? 0) + 1;
       scheduleRetry(this.state, issueId, nextAttempt, {
         identifier: entry.identifier,
-        error: result.error,
+        error: workerError ?? workerReason ?? result.status,
         maxBackoffMs: this.config.agent.max_retry_backoff_ms,
         onFire: (id) => this.handleRetryFired(id),
       });
